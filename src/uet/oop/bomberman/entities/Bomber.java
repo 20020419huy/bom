@@ -4,7 +4,6 @@ import javafx.scene.input.KeyCode;
 import uet.oop.bomberman.GameViewManager;
 import uet.oop.bomberman.entities.SubClass.Constant;
 import uet.oop.bomberman.graphics.AnimationFrame;
-import uet.oop.bomberman.graphics.Map;
 import uet.oop.bomberman.graphics.Sprite;
 
 import javax.sound.sampled.*;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 
 
 public class Bomber extends DynamicEntity {
-    private int heal = 500000;
+    private int heal = 1;
     private double speed = 4;
     private final double MAX_SPEED = 4;
     private int power_up = Constant.POWER_UP_1;
@@ -29,7 +28,7 @@ public class Bomber extends DynamicEntity {
     private long currentTime = 0;
     private long duration = 1000;
 
-//    private int sumBomb = 0;
+    //    private int sumBomb = 0;
     private final int MAX_BOMB = 2000;
     public static KeyCode KEY_BOMB = KeyCode.SPACE;
 
@@ -178,7 +177,7 @@ public class Bomber extends DynamicEntity {
         int currentBomb = 0;
         for(int i = 0; i < GameViewManager.stillObjects.size(); i++) {
             if(GameViewManager.stillObjects.get(i) instanceof  Bomb && GameViewManager.stillObjects.get(i).status != Constant.STATUS_DESTROYED) {
-               currentBomb++;
+                currentBomb++;
             }
         }
         if(currentBomb < MAX_BOMB) {

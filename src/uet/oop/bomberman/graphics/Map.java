@@ -81,7 +81,7 @@ public class Map {
                     } else if (data.charAt(j) == Constant.MAP_ONEAL) {
                         GameViewManager.stillObjects.add(new Oneal(j ,i, Sprite.oneal_right1));
                     }
-                    if(data.charAt(j) == Constant.MAP_GRASS || data.charAt(j) == Constant.MAP_PLAYER) {
+                    if(data.charAt(j) == Constant.MAP_GRASS || data.charAt(j) == Constant.MAP_PLAYER || data.charAt(j) == Constant.MAP_BOLLOOM || data.charAt(j) == Constant.MAP_ONEAL) {
                         entityNodeList[j][i].isGrass  = true;
                     }
                 }

@@ -1,12 +1,10 @@
 package uet.oop.bomberman;
 
 
+import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,34 +13,40 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-import uet.oop.bomberman.graphics.SpriteSheet;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.event.TextEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.FileInputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URLConnection;
+import java.util.*;
 
 public class MenuManager {
     private static final double WIDTH = 800;
     private static final double HEIGHT = 600;
-    private AnchorPane mainPane;
-    private Scene mainScene;
-    private Stage mainStage;
+    public AnchorPane mainPane;
+    public Scene mainScene;
+    public Stage mainStage;
     private BackgroundImage background;
     private List<MenuButton> buttons = new ArrayList<>();
     private RunnerSubScene LevelSubScene;
-    private RunnerSubScene scoreSubscene;
+    private RunnerSubScene scoreSubscene =  new RunnerSubScene();
+
     private String choose;
     private String urlBackGround = "/img/background.png";
     private String urlLogo = "/img/logo.png";
+    private String urlLogoScore = "/img/score.png";
+
+    private Text stt_ = new Text("0");
+    private Text score_text = new Text("0");
+    private Text level_text = new Text("0");
+
+    public static List<Text> sttLists = new ArrayList<>();
+    public static List<Text> scoreTextLists = new ArrayList<>();
+    public static List<Text> levelTextLists = new ArrayList<>();
+    public static List<Scorelist> scorelists = new ArrayList<>();
+
+    private ArrayList<List> listScore = new ArrayList<List>();
+
     private void creatBackground() {
         URL link = MenuManager.class.getResource(urlBackGround);
         javafx.scene.image.Image backgroundImage = new Image(link.toString());
@@ -143,9 +147,116 @@ public class MenuManager {
     }
 
     private void creatScoreSubscene() {
-        scoreSubscene = new RunnerSubScene();
-        scoreSubscene.getPane().setStyle("-fx-background-color: #2a2d93");
+
+        //scoreSubscene.getPane().setStyle("-fx-background-color: #2a2d93");
+        URL urlLogo = MenuManager.class.getResource(urlLogoScore);
+
+        ImageView logoScore = new ImageView(urlLogo.toString());
+        logoScore.setLayoutX(100);
+        logoScore.setLayoutY(2);
+        logoScore.setFitWidth(200);
+        logoScore.setFitHeight(100);
+
+        logoScore.setOnMouseEntered(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                logoScore.setEffect(new DropShadow());
+            }
+        });
+
+        logoScore.setOnMouseExited(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                logoScore.setEffect(null);
+            }
+        });
+
+        Text stt = new Text("STT");
+        stt.setLayoutX(100);
+        stt.setLayoutY(100);
+
+        Text level = new Text("LEVEL");
+        level.setLayoutX(160);
+        level.setLayoutY(100);
+
+        Text kill = new Text("SCORE");
+        kill.setLayoutX(250);
+        kill.setLayoutY(100);
+
+        updateScoreList();
+        for (int i = 0; i < 5; i++) {
+            Text newText = new Text("0");
+            sttLists.add(newText);
+            scoreTextLists.add(newText);
+            levelTextLists.add(newText);
+        }
+        for (int i = 0; i < 5; i++) {
+            Text newText = new Text(String.valueOf(i));
+            newText.setLayoutX(100);
+            newText.setLayoutY(i*30 + 130);
+            sttLists.set(i, newText);
+            newText = new Text(String.valueOf(scorelists.get(i).getLevel()));
+            newText.setLayoutX(170);
+            newText.setLayoutY(i*30 + 130);
+            levelTextLists.set(i, newText);
+            newText = new Text(String.valueOf(scorelists.get(i).getScore()));
+            newText.setLayoutX(260);
+            newText.setLayoutY(i*30 + 130);
+            scoreTextLists.set(i, newText);
+            scoreSubscene.getPane().getChildren().addAll(sttLists.get(i), levelTextLists.get(i), scoreTextLists.get(i));
+        }
+
+
+        scoreSubscene.getPane().getChildren().addAll(stt, level, kill, logoScore);
         mainPane.getChildren().add(scoreSubscene);
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                updateScore();
+            }
+        };
+        timer.start();
+
+
+    }
+    public void updateScore() {
+        for (int i = 0; i < 5; i++) {
+            scoreTextLists.get(i).setText(String.valueOf(scorelists.get(i).getScore()));
+            levelTextLists.get(i).setText(String.valueOf(scorelists.get(i).getLevel()));
+        }
+    }
+
+    public void updateScoreList() {
+        try {
+            String urlScoreFile = "/img/score.png";
+            URL linkFile = MenuManager.class.getResource(urlScoreFile);
+            String s = linkFile.toString().substring(0,linkFile.toString().length()-3) + "txt";
+            s = s.substring(6);
+            System.out.println(s);
+
+            FileInputStream fileInputStream = new FileInputStream(s);
+            Scanner sc = new Scanner(fileInputStream);
+            while (sc.hasNextInt() ) {
+                Scorelist newScorelist  = new Scorelist();
+                int a = sc.nextInt();
+                int b = sc.nextInt();
+                newScorelist.setLevel(a);
+                newScorelist.setScore(b);
+                scorelists.add(newScorelist);
+            }
+            Collections.sort(scorelists, new Comparator<Scorelist>() {
+                @Override
+                public int compare(Scorelist o1, Scorelist o2) {
+                    if (o1.getScore() > o2.getScore()) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            });
+
+        } catch (Exception e) {
+            System.out.println("Lỗi mở file");
+        }
     }
 
     private void creatButton() {
@@ -185,10 +296,10 @@ public class MenuManager {
         buttonLevel.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-               LevelSubScene.moveSubScene();
-               if (!LevelSubScene.isHidden && !scoreSubscene.isHidden) {
-                   scoreSubscene.moveSubScene();
-               }
+                LevelSubScene.moveSubScene();
+                if (!LevelSubScene.isHidden && !scoreSubscene.isHidden) {
+                    scoreSubscene.moveSubScene();
+                }
             }
         });
         buttons.add(buttonLevel);
@@ -202,9 +313,9 @@ public class MenuManager {
             @Override
             public void handle(MouseEvent event) {
                 scoreSubscene.moveSubScene();
-               if(!scoreSubscene.isHidden && !LevelSubScene.isHidden) {
-                   LevelSubScene.moveSubScene();
-               }
+                if(!scoreSubscene.isHidden && !LevelSubScene.isHidden) {
+                    LevelSubScene.moveSubScene();
+                }
             }
         });
         buttons.add(buttonScore);

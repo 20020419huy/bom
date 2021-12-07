@@ -4,8 +4,6 @@ import uet.oop.bomberman.GameViewManager;
 import uet.oop.bomberman.entities.SubClass.Constant;
 import uet.oop.bomberman.graphics.AnimationFrame;
 import uet.oop.bomberman.graphics.Sprite;
-
-import javax.sound.sampled.Clip;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,7 +19,6 @@ public class Flame extends DynamicEntity  {
     public boolean collision = false;
     private ArrayList<Sprite> frames = new ArrayList<Sprite>();
     private AnimationFrame animationFrame;
-
 
     public Flame(int xUnit, int yUnit, Sprite sprite) {
         super(xUnit, yUnit, sprite);

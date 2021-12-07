@@ -1,30 +1,32 @@
 package uet.oop.bomberman;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.io.*;
+import java.net.URL;
+import java.util.*;
+import java.util.List;
+
 import uet.oop.bomberman.entities.*;
 import uet.oop.bomberman.entities.SubClass.Constant;
+import uet.oop.bomberman.graphics.*;
 import uet.oop.bomberman.graphics.Map;
-import uet.oop.bomberman.graphics.Sprite;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GameViewManager {
     private Scene scene;
@@ -37,10 +39,13 @@ public class GameViewManager {
     private KeyCode direc = null;
     private String Level;
     private int heal;
-    private int power_up;
     private double speed;
-    public boolean isClosed = false;
     private HBox menu;
+    private ImageView winImg;
+    private int winGame = 0;
+    private int winGame_ = 0;
+    public boolean isClosed = false;
+    private RunnerSubScene healScene;
     private Map map = new Map();
     private Text textHeal = new Text("0");
     private Text textSpeed  = new Text("0");
@@ -71,14 +76,26 @@ public class GameViewManager {
         menu.setPrefWidth(Sprite.SCALED_SIZE * (Constant.WIDTH / 2));
         menu.setPrefHeight(Sprite.SCALED_SIZE * Constant.HEIGHT_MENU);
         menu.setStyle("-fx-background-color: #FA8072");
-        menu.getChildren().add(textHeal);
-        menu.getChildren().add(textPowerup);
-        menu.getChildren().add(textSpeed);
+        textHeal.setFont(new Font("verdana", 15));
+        textHeal.setFill(Color.rgb(47,226,226));
+        textHeal.setX(15);
+        textHeal.setY(30);
+        textPowerup.setFont(new Font("verdana", 15));
+        textPowerup.setFill(Color.rgb(47,226,226));
+        textPowerup.setX(150);
+        textPowerup.setY(30);
+        textSpeed.setFont(new Font("verdana", 15));
+        textSpeed.setFill(Color.rgb(47,226,226));
+        textSpeed.setX(250);
+        textSpeed.setY(30);
+
+
+
 
         // Tao root container
         Group root = new Group();
         root.setClip(new Rectangle(Sprite.SCALED_SIZE * (Constant.WIDTH / 2), Sprite.SCALED_SIZE * (Constant.HEIGHT + Constant.HEIGHT_MENU)));
-        root.getChildren().addAll(menu, canvas);
+        root.getChildren().addAll(menu, canvas, textHeal,textPowerup, textSpeed);
         canvas.setLayoutY(Sprite.SCALED_SIZE * Constant.HEIGHT_MENU);
 
         // Tao scene
@@ -90,20 +107,99 @@ public class GameViewManager {
         gameStage.show();
         // lang nghe di ban phim
         move(scene);
+
+        String ulrGameOver = "/img/gameover.png";
+        URL link = GameViewManager.class.getResource(ulrGameOver);
+        ImageView imageView = new ImageView(link.toString());
+        imageView.setFitHeight(500);
+        imageView.setFitWidth(500);
+
+        String ulrWinGame = "/img/youwin.png";
+        URL link1 = GameViewManager.class.getResource(ulrWinGame);
+
+
+        //WinGamer
+        for (int i = 0 ; i < stillObjects.size(); i++) {
+            if (stillObjects.get(i) instanceof Balloon ) {
+                winGame+=2;
+            } else if (stillObjects.get(i) instanceof Oneal) {
+                winGame+=1;
+            }
+        }
+        System.out.println(winGame);
+        URL linkFile = GameViewManager.class.getResource("/img/score.png");
+        String s = linkFile.toString().substring(6,linkFile.toString().length() - 3) + "txt";
+        System.out.println(s);
+
+
+
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
                 render();
                 update();
                 bomber.updatePosition(direc);
-                if (heal < 0) {
+                if (winGame == Constant.score) {
+                    Scorelist scorelist = new Scorelist();
+                    scorelist.setScore(Constant.score);
+                    scorelist.setLevel(level);
+                    MenuManager.scorelists.add(scorelist);
+                    Collections.sort(MenuManager.scorelists, new Comparator<Scorelist>() {
+                        @Override
+                        public int compare(Scorelist o1, Scorelist o2) {
+                            if (o1.getScore() > o2.getScore()) {
+                                return -1;
+                            }
+                            return 0;
+                        }
+                    });
+                    try {
+
+                        FileWriter fw = new FileWriter(s, true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write( String.valueOf(level) + " " + String.valueOf(Constant.score) + "\n");
+                        Constant.score = 0;
+                        bw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     stop();
+                    winImg = new ImageView(link1.toString());
+                    winImg.setLayoutY(95);
+                    winImg.setLayoutX(80);
+                    System.out.println(winImg.getFitHeight());
+                    root.getChildren().add(winImg);
+                }
+
+                if (heal == 0) {
+
+                    Scorelist scorelist = new Scorelist();
+                    scorelist.setScore(Constant.score);
+                    scorelist.setLevel(level);
+                    MenuManager.scorelists.add(scorelist);
+                    try {
+                        FileWriter fw = new FileWriter(s, true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write( String.valueOf(level) + " " + String.valueOf(Constant.score) + "\n");
+                        Constant.score = 0;
+                        bw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (bomber.status == Constant.STATUS_DESTROYED ) stop();
+                    HBox gameover = new HBox();
+                    gameover.setPrefHeight(500);
+                    gameover.setPrefWidth(500);
+                    gameover.getChildren().add(imageView);
+                    root.getChildren().add(gameover);
+                    if (bomber.status == Constant.STATUS_DESTROY) bomber.status = Constant.STATUS_DESTROYED;
                 }
             }
+
+
         };
         timer.start();
     }
-
     public void move(Scene scene) {
         scene.setOnKeyPressed((KeyEvent e) -> {
 //            if(e.getCode() != Bomber.KEY_BOMB) {
@@ -143,11 +239,11 @@ public class GameViewManager {
 
     private void updateSocore() {
         heal = bomber.getHeal();
-        power_up = bomber.getPower_up();
         speed = bomber.getSpeed();
         textHeal.setText("Mạng: " + String.valueOf(heal));
-        textPowerup.setText("Bom: " + String.valueOf(power_up));
+        textPowerup.setText("Điểm: " + String.valueOf(Constant.score));
         textSpeed.setText("Tốc độ: " + String.valueOf(speed));
+
     }
 
     public void creatNewGame() {
@@ -156,6 +252,11 @@ public class GameViewManager {
 
     public void setLevel(String choose) {
         Level = choose;
+    }
+
+    public void gameOver() {
+
+
     }
 
     public String getLevel() {

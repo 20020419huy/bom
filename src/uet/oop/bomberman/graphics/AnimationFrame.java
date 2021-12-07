@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.util.Duration;
 import uet.oop.bomberman.GameViewManager;
+import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.DynamicEntity;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.SubClass.Constant;
@@ -15,6 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class AnimationFrame {
+    private boolean dead = false;
     private boolean isPressed = false;
     private Timeline timeline = null;
     private Entity entity = null;
@@ -48,18 +50,22 @@ public class AnimationFrame {
     public void loadFrame() {
         if(entity.status == Constant.STATUS_UP) {
             frames = framesUp;
+            dead = false;
         } else if (entity.status == Constant.STATUS_RIGHT) {
             frames = framesRight;
+            dead = false;
         } else if (entity.status == Constant.STATUS_DOWN) {
             frames = framesDown;
+            dead = false;
         } else if(entity.status == Constant.STATUS_LEFT) {
             frames = framesLeft;
+            dead = false;
         } else if (entity.status == Constant.STATUS_DESTROY) {
             frames = framesDestroy;
+            dead = true;
         } else if(entity.status == Constant.STATUS_DESTROYED) {
             frames = Constant.getTransparent();
         }
-
         if(entity.status != Constant.STATUS_STAND && entity.status != Constant.STATUS_SET_BOMB){
             if(isPressed == false) {
                 isPressed = true;
@@ -93,4 +99,7 @@ public class AnimationFrame {
         timeline.pause();
     }
 
+    public boolean isDead() {
+        return dead;
+    }
 }

@@ -62,7 +62,9 @@ public class Constant {
     public static final String URL_SOUND_PLAYER_DIED = "/sounds/player_died.wav";
     public static final String URL_SOUND_GET_ITEM = "/sounds/get_item.wav";
     public static final String URL_SOUND_BOMB_EXPLOSION = "/sounds/bomb_explosion.wav";
+    public static final String URL_SOUND_BUTTON = "/sounds/get_item.wav";
 
+    public static int score = 0;
     public static Clip test;
 
     public static final String BASE_MAP_URL = "/levels/Level";
@@ -74,25 +76,25 @@ public class Constant {
         return result;
     }
 
-   public static Clip getSound(String url) {
-       try {
-           // Open an audio input stream.
-           URL file = Constant.class.getResource(url);
-           AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
-           // Get a sound clip resource.
-           Clip clip = AudioSystem.getClip();
-           // Open audio clip and load samples from the audio input stream.
-           clip.open(audioIn);
-           return clip;
-       } catch (UnsupportedAudioFileException e) {
-           e.printStackTrace();
-       } catch (IOException e) {
-           e.printStackTrace();
-       } catch (LineUnavailableException e) {
-           e.printStackTrace();
-       }
-       return null;
-   }
+    public static Clip getSound(String url) {
+        try {
+            // Open an audio input stream.
+            URL file = Constant.class.getResource(url);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
+            // Get a sound clip resource.
+            Clip clip = AudioSystem.getClip();
+            // Open audio clip and load samples from the audio input stream.
+            clip.open(audioIn);
+            return clip;
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
 }

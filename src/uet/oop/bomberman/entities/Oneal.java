@@ -62,6 +62,8 @@ public class Oneal extends Alien {
                     status = Constant.STATUS_DESTROYED;
                     animationFrame.loadFrame();
                     animationFrame.stopAnimation();
+                    this.x = 0;
+                    this.y = 0;
                 } else {
                     animationFrame.setTime(speedAnimationDead);
                     animationFrame.loadFrame();
